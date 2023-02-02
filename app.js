@@ -5,6 +5,15 @@ const { youtube } = require('scrape-youtube');
 const bot = new Telegraf(token);
 
 
+
+bot.use(async (ctx, next) => {
+    console.time(`Processing update ${ctx.update.update_id}`);
+    await next() // runs next middleware
+    // runs after next middleware finishes
+    console.timeEnd(`Processing update ${ctx.update.update_id}`);
+})
+
+
 bot.command('/get', async (ctx, next) => {
 
     let text_message = ctx.message.text
@@ -29,4 +38,6 @@ bot.on('text', async (ctx) => {
 
 
 
-bot.launch();
+bot.launch(() => {
+    console.log("connected")
+});

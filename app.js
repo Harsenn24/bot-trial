@@ -1,18 +1,31 @@
-const cors = require("cors");
+"use strict";
+
 require("dotenv").config()
-const express = require("express");
-const app = express();
-const { router } = require("./router");
-const port = 3005
+const { Telegraf } = require('telegraf');
+const token = process.env.token_tele
+const bot = new Telegraf(token);
+const { read_token, read_token_seller } = require("./middleware/auth");
+const login_page = require("./compose/login_page");
+const clinic_choice = require("./compose/choose_clinic");
+const dashboard = require("./compose/dashboard");
+const { connectionSkinMistery } = require("./config");
 
+bot.use(login_page)
 
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+bot.use(async (ctx, next) => {
+    await read_token(ctx, next)
+})
 
-app.use(router)
+bot.use(clinic_choice)
 
-app.listen(port, () => {
-    console.log(`Listening on port ${port}`);
+// bot.use(async (ctx, next) => {
+//     await read_token_seller(ctx, next)
+// })
+
+bot.use(dashboard)
+
+connectionSkinMistery().then(async () => {
+    console.log("Success Connected to MongoDB!");
+    bot.launch()
 });
 
